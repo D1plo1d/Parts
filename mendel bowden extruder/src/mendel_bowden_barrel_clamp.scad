@@ -12,16 +12,16 @@ difference()
 	union()
 		{
 		// PTFE holder (for woodscrews instead of epoxy)
-		translate([filament_x_offset+2,0,-10])cube([12,extruder_thick,20], center = false);
+		translate([filament_x_offset-2-12,0,0])cube([12,extruder_thick,barrel_clamp_height], center = false);
 		}
 	union()
 		{
-		// 1/2 PTFE barrel clamp
-		#translate([filament_x_offset,extruder_thick/2,0]) rotate ([90,0,0]) rotate([90,0,0])cylinder(h=22.5,r=ptfe_rad,center=true);
+		// PTFE barrel hole
+		translate([filament_x_offset,extruder_thick/2,0]) rotate ([90,0,0]) rotate([90,0,0])cylinder(h=barrel_clamp_height+2.5+30,r=ptfe_rad,center=true);
 		
 		// M4 thermal barrier barrel clamp holes
-		translate([filament_x_offset,5.5,0]) rotate([0,90,0]) m4_hole_horiz(50);
-		translate([filament_x_offset,extruder_thick-5.5,0]) rotate([0,90,0]) m4_hole_horiz(50);
+		translate([filament_x_offset,5.5,barrel_clamp_height/2+2]) rotate([0,90,0]) m4_hole_horiz(50);
+		translate([filament_x_offset,extruder_thick-5.5,barrel_clamp_height/2+2]) rotate([0,90,0]) m4_hole_horiz(50);
 		
 		}
 	}

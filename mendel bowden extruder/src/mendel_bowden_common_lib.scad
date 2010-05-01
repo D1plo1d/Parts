@@ -13,6 +13,9 @@ bowden_cable_rad=6.5;		// Includes some clearance.
 nut_inset_depth = 6.7;	// The depth of the hexoginal hole for the nut to sit in
 nut_rad = 12.7;			// nut on the bowden cable
 
+//Barrel clamp config
+barrel_clamp_height = 10;
+
 extruder_thick=nut_rad*2+10;
 extruder_height=10;		// The overall height of this part when 
 
