@@ -8,8 +8,9 @@ filament_rad=1.6;		// Includes some clearance.
 ptfe_rad=9.2;			// 18mm dia PTFE spacer. May well be 16mm rad for you.
 
 nut_rad = 8.3;			// M8 nut on the bowden cable
-extruder_thick=20;
-extruder_height=34;
+nut_rad = 12.7;			// nut on the bowden cable
+extruder_thick=nut_rad*2+10;
+extruder_height=10;
 extruder_clamp_thick=30;
 filament_x_offset=26.497;
 
@@ -105,9 +106,7 @@ module m3_slot() {
 filament_oversize=0.4;	// If your extruder is perfect this can be zero :)
 module filament_cavity() {
 	union () {
-		cylinder(100,filament_rad+filament_oversize,filament_rad+filament_oversize,center=true);
-		translate ([0.6*filament_rad,0,0]) rotate ([0,0,45])
-			cube([filament_rad+filament_oversize,filament_rad+filament_oversize,100],center=true);
+		cylinder(extruder_height+2,filament_rad+filament_oversize,filament_rad+filament_oversize,center=true);
 	}
 }
 
@@ -120,31 +119,29 @@ difference()
 	union()
 		{
 		// Main block of the thing.
-       		translate([30,extruder_thick/2,22])cube([60,extruder_thick,extruder_height], center = true);
+       		translate([30,extruder_thick/2,extruder_height/2+10])cube([60,extruder_thick,extruder_height], center = true);
 		// PTFE holder (for woodscrews instead of epoxy)
-		translate([filament_x_offset,extruder_thick/2,0])cube([22,extruder_thick,20], center = true);
+		translate([filament_x_offset,0,-10])cube([15,extruder_thick,20], center = false);
 		}
 	union()
 		{
-translate([filament_x_offset,extruder_thick/2,21.635])rotate([0,0,90]) filament_cavity();
+translate([filament_x_offset,extruder_thick/2,extruder_height/2+11])rotate([0,0,90]) filament_cavity();
 
 		// Horizontal M4 holes
-		translate([5,extruder_thick/2,22.0])rotate([0,0,90]) m4_hole_horiz(extruder_height*1.1);
-		translate([55,extruder_thick/2.09,22])rotate([0,0,90]) m4_hole_horiz(extruder_height*1.1);
+		translate([5,extruder_thick/2,extruder_height/2+10])rotate([0,0,90]) m4_hole_vert(extruder_height*1.1);
+		translate([55,extruder_thick/2.09,extruder_height/2+10])rotate([0,0,90]) m4_hole_vert(extruder_height*1.1);
 
-//Hex Filament Nut Hole
-#translate([filament_x_offset,extruder_thick/2,40]) rotate ([90,0,0]) rotate([90,90,0])cylinder(h=20,r=nut_rad,center=true, $fn=6);
-
-		// Split PTFE holder
-		#translate([filament_x_offset,extruder_thick/2,-2.5]) rotate ([90,0,0]) rotate([90,0,0])cylinder(h=20,r=ptfe_rad,center=true);
-		#translate([filament_x_offset ,extruder_thick/2, -2.5])cube([3.4,20.889,18],center = true);
-		// 3mm holes for woodscrews
-		#translate([filament_x_offset-6.5,extruder_thick/2,-1.4]) rotate ([90,0,0]) cylinder(h=extruder_thick*2,r=2.5,center=true);
-		#translate([filament_x_offset+6.5,extruder_thick/2,-1.4]) rotate ([90,0,0]) cylinder(h=extruder_thick*2,r=2.5,center=true);
+		// 1/2 PTFE barrel clamp
+		#translate([filament_x_offset,extruder_thick/2,0]) rotate ([90,0,0]) rotate([90,0,0])cylinder(h=22.5,r=ptfe_rad,center=true);
+		
+		// M4 thermal barrier barrel clamp holes
+		translate([filament_x_offset,5.5,0]) rotate([0,90,0]) m4_hole_horiz(50);
+		translate([filament_x_offset,extruder_thick-5.5,0]) rotate([0,90,0]) m4_hole_horiz(50);
+		
 		}
 	}
 }
 }
 
 // Put it in X+ve, Y+ve
-translate ([40,45,0]) pinchwheel();
+rotate([90,0,0])translate ([40,45,0]) pinchwheel();
