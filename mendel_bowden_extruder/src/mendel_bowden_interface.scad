@@ -5,6 +5,8 @@ interface = true;
 // vik@diamondage.co.nz, 2010-01-02
 // Pinch bearing & filament size is parametric. Also added pointy tops to horizontal holes.
 
+m4_tower_radius = 7;
+
 /*module filament_cavity() {
 	union () {
 		cylinder(extruder_height+2,filament_rad+filament_oversize,filament_rad+filament_oversize,center=true);
@@ -20,10 +22,10 @@ difference()
 	union()
 		{
 		// Main block of the thing.
-       		translate([30,extruder_thick/2,extruder_height/2+10])cube([60,extruder_thick,extruder_height], center = true);
+       		translate([30,extruder_thick/2,extruder_height/2+10])cube([50+m4_tower_radius*2, extruder_thick,extruder_height], center = true);
 		//M4 hole towers
-		translate([5,extruder_thick/2,-barrel_clamp_height/2+10])rotate([0,0,90]) cylinder(barrel_clamp_height,5,5, center = true);
-		translate([55,extruder_thick/2.09,-barrel_clamp_height/2+10])rotate([0,0,90]) cylinder(barrel_clamp_height,5,5, center = true);
+		translate([5,extruder_thick/2,-barrel_clamp_height/2+10])rotate([0,0,90]) cylinder(barrel_clamp_height,m4_tower_radius,m4_tower_radius, center = true);
+		translate([55,extruder_thick/2.09,-barrel_clamp_height/2+10])rotate([0,0,90]) cylinder(barrel_clamp_height,m4_tower_radius,m4_tower_radius, center = true);
 		}
 	union()
 		{
@@ -45,5 +47,5 @@ difference()
 union()
 {
 	rotate([90,0,0])translate ([40,45,0]) pinchwheel();
-	barrel_clamp();
+	barrel_clamp(barrel_clamp_block_height = barrel_clamp_height+extruder_height);
 }

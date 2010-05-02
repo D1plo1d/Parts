@@ -9,14 +9,15 @@ filament_oversize=0;	// Legacy
 ptfe_rad=9.2;			// 18mm dia PTFE spacer. May well be 16mm rad for you.
 
 //Bowden cable config
-bowden_cable_rad=6.5;		// Includes some clearance.
+bowden_cable_rad=6.5 / 2;	// Includes some clearance.
 nut_inset_depth = 6.7;	// The depth of the hexoginal hole for the nut to sit in
-nut_rad = 12.7;			// nut on the bowden cable
+nut_rad = 12.7 / 2;			// nut on the bowden cable
 
 //Barrel clamp config
 barrel_clamp_height = 10;
+barrel_clamp_width = 40;
 
-extruder_thick=nut_rad*2+10;
+extruder_thick=nut_rad*2+15;
 extruder_height=10;		// The overall height of this part when 
 
 extruder_clamp_thick=30;
@@ -60,8 +61,9 @@ module m8_hole_horiz(l) {
 		cube([m8_clearance_rad,m8_clearance_rad,l],center=true);
 }
 
+//Modded for more clearance on vertical holes
 module m4_hole_vert(l) {
-	cylinder(l,m4_clearance_rad+0.2,m4_clearance_rad+0.2,center=true);
+	cylinder(l,m4_clearance_rad+0.5,m4_clearance_rad+0.7,center=true);
 }
 
 module m6_hole_horiz(l) {
