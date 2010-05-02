@@ -20,7 +20,7 @@ difference()
 	union()
 		{
 		// Bowden Cable hole
-translate([filament_x_offset,extruder_thick/2,21.635])rotate([0,0,90]) cylinder(100,bowden_cable_rad+filament_oversize,bowden_cable_rad+filament_oversize,center=true);
+translate([filament_x_offset,extruder_thick/2,21.635])rotate([0,0,90]) cylinder(100,bowden_cable_rad,bowden_cable_rad,center=true);
 
 		// Horizontal M4 holes
 		translate([5,extruder_thick/2,extruder_height/2+10])rotate([0,0,90]) m4_hole_vert(extruder_height*1.1);
