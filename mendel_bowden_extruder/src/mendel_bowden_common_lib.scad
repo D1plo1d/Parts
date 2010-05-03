@@ -9,9 +9,9 @@ filament_oversize=0;	// Legacy
 ptfe_rad=9.2;			// 18mm dia PTFE spacer. May well be 16mm rad for you.
 
 //Bowden cable config
-bowden_cable_rad=(6.4 + 3) / 2;	// Includes some clearance.
+bowden_cable_rad=(6.4 + 2) / 2;	// Includes some clearance.
 nut_inset_depth = 6.7;	// The depth of the hexoginal hole for the nut to sit in
-nut_rad = (12.35 + 3.2) / 2;			// nut on the bowden cable
+nut_rad = (12.35 + 2.2) / 2;			// nut on the bowden cable
 
 //Barrel clamp config
 barrel_clamp_height = 10;
