@@ -20,8 +20,29 @@ difference()
 		translate([0,barrel_clamp_width/2,0]) rotate ([90,0,0]) rotate([90,0,0])cylinder(h=barrel_clamp_height+2.5+30,r=ptfe_rad,center=true);
 		
 		// M4 thermal barrier barrel clamp holes
-		translate([0,barrel_clamp_width-5.5,barrel_clamp_height/2]) rotate([0,90,0]) m4_hole_horiz(50);
-		translate([0,5.5,barrel_clamp_height/2]) rotate([0,90,0]) m4_hole_horiz(50);
+		translate([0,barrel_clamp_width-5.5,barrel_clamp_height/2]) rotate([0,90,0])
+		{
+			if (interface)
+			{
+				m4_hole_horiz(50);
+			}
+			else
+			{
+				m4_hole_vert(50);
+			}
+		}
+		translate([0,5.5,barrel_clamp_height/2]) rotate([0,90,0])
+		{
+			if (interface)
+			{
+				m4_hole_horiz(50);
+			}
+			else
+			{
+				m4_hole_vert(50);
+			}
+		}
+
 		
 		}
 	}
@@ -34,5 +55,5 @@ if (interface)
 }
 else
 {
-	barrel_clamp();
+	rotate ([0,270,270]) barrel_clamp();
 }
