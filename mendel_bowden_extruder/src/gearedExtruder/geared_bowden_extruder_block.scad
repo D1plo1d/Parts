@@ -107,6 +107,8 @@ module bearing_hole(outer_radius, hole=true, mochup=true)
 //REPRAP LIB
 //=======
 
+$fn = 70;
+
 module flat_pack_nut_trap(screw_diameter, screw_length, nut_diameter, nut_length, include_mount_points = true, include_mochups = true,  include_screw_trap = true, include_nut_trap = true, mount_screws = [-1,1])
 {
 	if (include_mochups == true)
@@ -146,25 +148,55 @@ module flat_pack_nut_trap_holes(nut_diameter, nut_length, mount_screws)
 //Part
 //=======================================
 
-bearing_screw_slot_length = 7;//the length of the slot used to position the feeder bearing
-bearing_screw_size = 4.5; //the size of the screw that holds on the feeder bearing
+socket_cap_radius = 7/2; //the radius of the head of a screw
+
+bearing_screw_slot_length = 0;//the length of the slot used to position the feeder bearing
+bearing_center_to_gear_center = 11.4;//the distance from the center of the gear to the center of the bearing screw slot
+bearing_screw_size = 4.2; //the size of the screw that holds on the feeder bearing
 
 bowden_nut_diameter = 10; //the diameter of the nut threaded on to the bowden cable.
 bowden_nut_length = 5; //the length of the nut along the axis of the bowden cable
 bowden_cable_diameter = 6.5;
 
-bearing_radius = 13/2;
+bowden_cable_offset = 3.5; //the radius of the small gear that drives the filament minus a bit so the teath can dig into the filament
 
-bearing_mount_type = 1; //1 = single screw slot mount, 2 = flat pack spring mount
-displayed_part = 0; // 0 = all; 1-3 = each individual part of the design
+bearing_radius = 13/2+0.2;
+bearing_trap_radius = 10/2;
 
-extruder_frame_height = 45; // 45 = mount type 1; 70 = type 2
+displayed_part = 0; // 0 = all; 1-7 = each individual part of the design
+
+extruder_frame_height = 40; // 45 = mount type 1; 70 = type 2
 extruder_frame_length = 90; //90 = mount type 1; 86 = type 2
 extruder_frame_back_inset = 48;
 
+extruder_frame_front_height = 90;
+
+bearing_mount_type = 1; //1 = single screw slot mount, 2 = flat pack spring mount. FYI 2 probably doesn't work any more.
+
+//Please excuse the mess. This has gone through many revisions and is a bit sloppy now.
+//=======================================
+
+
+//front
 if (displayed_part == 0 || displayed_part == 1) extruder_frame_front();
+//back
 if (displayed_part == 0 || displayed_part == 2) extruder_frame_back();
-if (displayed_part == 0 || displayed_part == 3) extruder_frame_middle();
+//middle
+if (displayed_part == 0 || displayed_part == 3) extruder_frame_middle(filament_hole = true);
+//spacer
+if (displayed_part == 0 || displayed_part == 4) translate([0,0,2])extruder_frame_middle(filament_hole = false);
+//front bearing trap
+if (displayed_part == 0 || displayed_part == 5) translate([0,0,4])extruder_frame_middle(filament_hole = false, bearing_trap = true, socket_caps = true)
+;
+//back bearing trap
+if (displayed_part == 0 || displayed_part == 6) translate([0,0,-4])extruder_frame_middle(filament_hole = false, bearing_trap = true);
+//mendel mount blocks
+if (displayed_part == 0)
+{
+	for (x=[-1,0]) for (y=[-1,0])
+		translate([x*(extruder_frame_front_height-20),y*(extruder_frame_length-10),3]) mount_blocks();
+}
+if (displayed_part == 7) translate([0,0,3])mount_blocks();
 
 
 bowden_nut_hole_x = (extruder_frame_height/2-bowden_nut_length-4);
@@ -217,10 +249,12 @@ module extruder_frame_front()
 	{
 		union()
 		{
-			square([extruder_frame_height,extruder_frame_length],center=true);
+			square([extruder_frame_front_height,extruder_frame_length],center=true);
 		}
 		union()
 		{
+			mount_holes();
+			
 			translate([0,-extruder_frame_length/2+23])
 			{
 				stepper_motor_mount(17, slide_distance = 5, mochup = false);
@@ -245,8 +279,6 @@ module extruder_frame_front()
 
 				bowden_nut_holes();
 
-				translate([0,bearing_radius+bearing_screw_size/2+0.5])
-				{
 					//screw
 					extruder_feeder_bearing_screw_slot();
 					%translate([0,0,-30/2])
@@ -254,10 +286,7 @@ module extruder_frame_front()
 						cylinder(h=30,r=4/2, center = true);
 					}
 					
-					//filament feeder bearing mochup
-					%translate([0,0,-3.5])bearing_hole(outer_radius=bearing_radius, hole=false);
 				}
-			}
 			}
 		}
 		extruder_frame_screws(include_mochups=true);
@@ -283,11 +312,7 @@ module extruder_frame_back()
 
 				bowden_nut_holes();
 
-				translate([0,bearing_radius+bearing_screw_size/2+0.5])
-				{
-					//screw
-					extruder_feeder_bearing_screw_slot();
-				}
+				extruder_feeder_bearing_screw_slot();
 			}
 		}
 		extruder_frame_screws();
@@ -297,64 +322,84 @@ module extruder_frame_back()
 
 frame_middle_hole_length = extruder_frame_length-extruder_frame_back_inset-10-12;
 frame_middle_b_length = 10;
-module extruder_frame_middle()
+module extruder_frame_middle(filament_hole, socket_caps=false)
 {
-	translate([0,0,-4]) difference()
+	translate([0,0,-4.5]) difference()
 	{
 		union()
 		{
-			square([extruder_frame_height,extruder_frame_length],center=true);
+			translate([0,extruder_frame_back_inset/2]) square([extruder_frame_height,extruder_frame_length-extruder_frame_back_inset],center=true);
+			//square([extruder_frame_height,extruder_frame_length],center=true);
 		}
 		union()
-		translate([0,extruder_frame_back_inset-extruder_frame_length/2+frame_middle_hole_length/2+12]) square([extruder_frame_height-(extruder_frame_height/2 - bowden_nut_hole_x)*2,frame_middle_hole_length],center=true);
+		if (filament_hole == true) translate([0,extruder_frame_back_inset-extruder_frame_length/2+frame_middle_hole_length/2+12]) square([extruder_frame_height-(extruder_frame_height/2 - bowden_nut_hole_x)*2,frame_middle_hole_length],center=true);
 		translate([0,-extruder_frame_length/2+23])
 		{
-			stepper_motor_mount(17, slide_distance = 5);
+			//stepper_motor_mount(17, slide_distance = 5);
 
 			translate([0, 37.5,0]) //empirical measurement
 			{
 				//bearing is centered opposing the gear this smaller screw hole traps the bearing
-				circle(10.5/2);
+				circle(bearing_trap_radius);
+
+				if (bearing_trap==true)
+				{
+					extruder_feeder_bearing_screw_slot(bearing_screw_size = socket_cap_radius*2);
+				}
+				else if (filament_hole==false) extruder_feeder_bearing_screw_slot(bearing_screw_size = bearing_radius*2);
+
 
 				bowden_nut_holes();
-
-
-				translate([0,bearing_radius+bearing_screw_size/2+0.5+bearing_screw_slot_length])
-				{
-					//screw
-					%translate([0,0,-30/2+4])
-					{
-						cylinder(h=30,r=4/2, center = true);
-					}
-					//filament feeder bearing mochup
-					translate([0,0,4-3.5])bearing_hole(outer_radius=bearing_radius);
-
-				}
 			}
-
 		}
-		extruder_frame_screws();
+		if (socket_caps == true)
+			extruder_frame_screws(include_mochups = false, screw_size = socket_cap_radius*2);
+		else 
+			extruder_frame_screws();
 	}
 }
 
+module mount_blocks()
+{
+	difference()
+	{
+		translate([extruder_frame_front_height/2-20,extruder_frame_length/2-10])
+		{
+			square([20,10]);
+		}
+		mount_hole();
+	}
+}
 
-module extruder_feeder_bearing_screw_slot()
+//mounts for the extruder to attach to the Mendel frame
+module mount_holes()
+{
+	union() for (x=[-1,1]) for (y=[-1,1])
+	{
+		mount_hole(x=x,y=y);
+	}
+}
+
+module mount_hole(x = 1, y = 1)
+{
+	 for (x2=[0,1]) translate([x*(extruder_frame_front_height/2-4.5/2-1-x2*(4.5+0.2+5/16*mm_per_inche)),y*(extruder_frame_length/2-4.5/2-2)]) circle(4.5/2);
+}
+
+module extruder_feeder_bearing_screw_slot(bearing_screw_size = bearing_screw_size, mochup = false)
 {
 	union()
 	{
-			circle(r=bearing_screw_size/2);
-			translate([-bearing_screw_size/2,0]) square([bearing_screw_size,bearing_screw_slot_length]);
-			translate([0,bearing_screw_slot_length,0])
-			{
-				if (bearing_mount_type == 1) circle(r=bearing_screw_size/2);
-				if (bearing_mount_type == 2) square(bearing_screw_size, center=true);
-			}
-		if(bearing_mount_type == 2)
+		for (y=[-1,1]) translate([0,bearing_center_to_gear_center+bearing_screw_slot_length/2*y])
 		{
-			//Replaces feeder screw slots with nut traps for the bearing tensionion block
-			extruder_bearing_tensioner_screw_traps();
+			circle(r=bearing_screw_size/2);
 		}
-
+		if (mochup == true)
+		{
+			//filament feeder bearing mochup
+			%translate([0,bearing_center_to_gear_center,-3.5])bearing_hole(outer_radius=bearing_radius, hole=false);
+			//screw mochup
+			%translate([0,bearing_center_to_gear_center,-30/2+4]) cylinder(h=30,r=4/2, center = true);
+		}
 	}
 }
 
@@ -364,16 +409,16 @@ module extruder_bearing_tensioner_screw_traps(include_nut_trap = true, include_s
 }
 
 
-module extruder_frame_screws(include_mochups = false)
+module extruder_frame_screws(include_mochups = false, screw_size = 4.2)
 {
 	for (x=[-1,1]) for(y=[-1,1])
 	{
 		translate([(extruder_frame_height/2-5)*x,extruder_frame_back_inset/2+((extruder_frame_length-extruder_frame_back_inset)/2-5)*y])
 		{
-			circle(4.5/2);
+			circle(screw_size/2);
 			if (include_mochups == true)
 			{
-				%translate([0,0,-16/2]) cylinder(r=4/2, h=16, center = true);
+				%translate([0,0,-16/2]) cylinder(r=screw_size/2, h=16, center = true);
 			}
 		}
 	}
@@ -383,12 +428,12 @@ module bowden_nut_holes()
 {
 	for (x=[-1,1])
 	{
-		translate([bowden_nut_hole_x*x,bearing_screw_size/2+1])
+		translate([bowden_nut_hole_x*x,bearing_screw_size/2+bowden_cable_offset])
 		{
 			//nut hole
 			square([bowden_nut_length, bowden_nut_diameter], center=true);
 			//cable hole
-			translate([(extruder_frame_height/2 - bowden_nut_hole_x)/2*x,0])square([extruder_frame_height/2 - bowden_nut_hole_x, bowden_cable_diameter], center=true);
+			translate([(extruder_frame_front_height/2 - bowden_nut_hole_x)/2*x,0])square([extruder_frame_front_height/2 - bowden_nut_hole_x, bowden_cable_diameter], center=true);
 		}
 	}
 }
