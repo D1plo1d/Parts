@@ -10,7 +10,10 @@ module test()
 for (i=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15])
 {
 	echo(polar_to_cartesian([involute_intersect_angle( 0.1,i) , i ]));
-	translate(polar_to_cartesian([involute_intersect_angle( 0.1,i) , i ])) circle($fn=15, r=0.5);
+	//translate(polar_to_cartesian([involute_intersect_angle( 0.1,i) , i ])) circle($fn=15, r=0.5);
+
+	translate( involute_intersection_point(0.1,i,0) ) circle($fn=15, r=0.5);
+
 }
 }
 
@@ -22,37 +25,35 @@ PI = 3.1415926535;
 module gear(number_of_teeth, diametric_pitch, pressure_angle=20, simplify = true)
 {
 	addendum = 1/diametric_pitch;
-	dedenum = 1.157/diametric_pitch; 
+	dedenum = 1.157/diametric_pitch;
 	
 	pitch_diameter  =  number_of_teeth / diametric_pitch;
 	root_diameter = pitch_diameter-2*dedenum;
 	base_diameter = pitch_diameter*cos(pressure_angle);
 	outside_diameter = pitch_diameter+2*addendum;
-
+	
 	gear_tooth_spacing = 360/number_of_teeth;
 	
 	union()
 	{
-		//circle($fn=number_of_teeth, r=root_diameter/2);
+		circle($fn=number_of_teeth, r=root_diameter/2);
 		for (i= [1:number_of_teeth])
 		{
-			//rotate([0,0,-gear_tooth_spacing*i])
-			//{
-				if (simplify==true) simplified_gear_tooth(
+		//	rotate([0,0,-gear_tooth_spacing*i])
+		//	{
+				involute_gear_tooth(
 					pitch_diameter/2,
 					root_diameter/2,
 					base_diameter/2,
 					outside_diameter/2,
 					gear_tooth_spacing);
-				
-				if (simplify==false) involute_gear_tooth(number_of_teeth, pitch_diameter, pressure_angle);
-			//}
+		//	}
 		}
 	}
 }
 
 
-module simplified_gear_tooth(
+module involute_gear_tooth(
 					pitch_radius,
 					root_radius,
 					base_radius,
@@ -66,30 +67,36 @@ module simplified_gear_tooth(
 	
 	zero_angle = involute_intersect_angle(root_radius, base_radius) - gear_tooth_spacing/4;
 	
+	echo(zero_angle);
 	//echo(base_radius);
 	//echo(outside_radius);
-
-	rotate(10) for (i=[-1,1]) rotate(0) polygon(
+	
+	for (i=[0,1]) mirror([0, i]) polygon(
 		//     _
 		//   /   \
 		// _|    |_
 		points = [
-			// TODO: first vertical line
-			involute_intersetion_point( root_radius,  base_radius,  zero_angle ),
-			involute_intersetion_point( root_radius,  (outside_radius-base_radius)*2/8+base_radius,  zero_angle ),
-			involute_intersetion_point( root_radius,  (outside_radius-base_radius)*4/8+base_radius,  zero_angle ),
-			involute_intersetion_point( root_radius,  (outside_radius-base_radius)*6/8+base_radius,  zero_angle ),
-			involute_intersetion_point( root_radius,  outside_radius,  zero_angle ),
-			//TODO: horizontal top line
-			//TODO: second vertical line
+			//gear side
+			//[0,involute_intersection_point( base_radius,  base_radius,  zero_angle )[1]],
+			
+			//involute points
+			involute_intersection_point( base_radius,  base_radius,  zero_angle ),
+			involute_intersection_point( base_radius,  (outside_radius-base_radius)*2/8+base_radius,  zero_angle ),
+			involute_intersection_point( base_radius,  (outside_radius-base_radius)*4/8+base_radius,  zero_angle ),
+			involute_intersection_point( base_radius,  (outside_radius-base_radius)*6/8+base_radius,  zero_angle ),
+			involute_intersection_point( base_radius,  outside_radius,  zero_angle ),
+			
+			// gear top and side
+			// (0,0 to the involute forms the side)
+			[involute_intersection_point( base_radius,  outside_radius,  zero_angle )[0],0],
 			[0,0]
 		],
 		convexity = 3);
 }
 
 // Finds the intersection of the involute about the base radius with a cricle of the given radius in cartesian coordinates [x,y].
-function involute_intersetion_point(root_radius, radius, zero_angle) =
-	polar_to_cartesian([  involute_intersect_angle(root_radius, radius)-zero_angle  ,  radius  ]);
+function involute_intersection_point(base_radius, radius, zero_angle) =
+	polar_to_cartesian([  involute_intersect_angle(base_radius, radius)-zero_angle  ,  radius  ]);
 
 
 
