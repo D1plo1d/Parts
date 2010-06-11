@@ -141,9 +141,9 @@ module involute_gear_tooth(
 
 
 		polygon( points = [
-			r1_f, b1,p1,o1,o2,p2,b2,r2_f
+		//	r1_f, b1,p1,o1,o2,p2,b2,r2_f
 		//	r1_f, b1,p2,o2,o1,p1,b2,r2_f
-		//	r1_f, b1,p2,p1,b2,r2_f
+			r1_f, b1,p2,p1,b2,r2_f
 		//	p1, o1, o2, p2
 		], convexity = 3);
 	}
